@@ -6,6 +6,22 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+uint32_t nbo(char* file)
+{
+	FILE *fp;
+	fp = fopen(file, "rb");
+	if(fp == NULL)
+	{
+		printf("file %s open error", file);
+		exit(2);
+	}
+	char buf[5];
+	fread(buf, 1, 4, fp);
+	uint32_t* p = reinterpret_cast<uint32_t*>(buf);
+	fclose(fp);
+	return ntohl(*p);
+}
+
 int main(int ac, char *av[])
 {
 
@@ -13,38 +29,9 @@ int main(int ac, char *av[])
 	{
 		printf("Usage :/%s <file1> <file2>\n", av[0]);
 		exit(1);
-	}	
-
-	FILE *fpa, *fpb;
-	uint32_t a = 0, b = 0;
-	char buf[5];
-
-	fpa = fopen(av[1], "rb");
-	if(fpa == NULL)
-	{
-		printf("file %s open error\n", av[1]);
-		exit(2);
-	}
-	fpb = fopen(av[2], "rb");
-	if(fpb == NULL)
-	{
-		printf("file %s open error\n", av[2]);
-		exit(2);
 	}
 
-	fread(buf, 1, 4, fpa);
-	uint32_t* pa = reinterpret_cast<uint32_t*>(buf);
-	a = *pa;
-	a = ntohl(a);
-	
-	fread(buf, 1, 4, fpb);
-	uint32_t* pb = reinterpret_cast<uint32_t*>(buf);
-	b = *pb;
-	b = ntohl(b);
-	
-	fclose(fpb);
-	fclose(fpa);
-	
+	uint32_t a = nbo(av[1]), b = nbo(av[2]);
 	printf("%d(0x%x) + %d(0x%x) = %d(0x%x)\n", a, a, b, b, a+b, a+b);
 
 	return 0;
